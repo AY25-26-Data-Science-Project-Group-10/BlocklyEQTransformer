@@ -9,6 +9,7 @@ __pycache__
 .ipynb_checkpoints
 .coverage
 
+data
 *.egg-info
 build
 dist
