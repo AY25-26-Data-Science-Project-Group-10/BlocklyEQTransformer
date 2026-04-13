@@ -29,8 +29,13 @@ for root in root_folders:
             
             # Move all .mseed files to the station folder
             for fname in os.listdir(station_path):
+                src = os.path.join(station_path, fname)
+                # Delete Identifier files
+                if "Zone.Identifier" in fname:
+                    os.remove(src)
+                    continue
+
                 if fname.endswith(".mseed"):
-                    src = os.path.join(station_path, fname)
                     dst = os.path.join(target_station_path, fname)
                     shutil.move(src, dst)
             
