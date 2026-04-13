@@ -10,6 +10,7 @@ __pycache__
 .coverage
 
 data
+tests/dataset_processing/test.py
 *.egg-info
 build
 dist
