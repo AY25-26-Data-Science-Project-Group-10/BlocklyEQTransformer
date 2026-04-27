@@ -10,11 +10,11 @@ __pycache__
 .coverage
 
 # Ignore raw data
-/data/*
+#/data/*
 
 # Keep only generated fine-tuning datasets trackable
-!/data/finnish_*_finetune.csv
-!/data/finnish_*_finetune.hdf5
+#!/data/finnish_*_finetune.csv
+#!/data/finnish_*_finetune.hdf5
 
 tests/dataset_processing/test.py
 *.egg-info
