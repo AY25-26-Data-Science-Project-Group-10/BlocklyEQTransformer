@@ -9,7 +9,13 @@ __pycache__
 .ipynb_checkpoints
 .coverage
 
-data
+# Ignore raw data
+/data/*
+
+# Keep only generated fine-tuning datasets trackable
+!/data/finnish_*_finetune.csv
+!/data/finnish_*_finetune.hdf5
+
 tests/dataset_processing/test.py
 *.egg-info
 build
@@ -17,3 +23,4 @@ dist
 
 _build
 .codex
+*.hdf5

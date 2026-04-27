@@ -488,11 +488,11 @@ class DataGenerator(keras.utils.Sequence):
                 #             if arrivals[i] > self.dim:
                 #
                 #                 arrivals[i] = np.nan
-                for i in range(len(arrivals)):
-                    if arrivals[i] > self.dim:
-                        arrivals[i] = np.nan
-                    if arrivals[i] <= 0:
-                        arrivals[i] = np.nan
+                for arrival_index in range(len(arrivals)):
+                    if arrivals[arrival_index] > self.dim:
+                        arrivals[arrival_index] = np.nan
+                    if arrivals[arrival_index] <= 0:
+                        arrivals[arrival_index] = np.nan
             elif ID.split('_')[-1] == 'NO':
                 data = np.array(dataset)
                 # dat_channel: int, numbers of channel
