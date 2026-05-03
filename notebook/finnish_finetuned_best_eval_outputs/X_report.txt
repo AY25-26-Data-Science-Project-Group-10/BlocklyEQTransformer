@@ -1,12 +1,12 @@
 ================== Overal Info ==============================
-date of report: 2026-05-03 14:40:45.298444
+date of report: 2026-05-03 18:23:22.401186
 input_hdf5: ../data/finnish_eq_finetune.hdf5
 input_testset: eq_finetune_outputs/test.npy
-input_model: eq_finetune_outputs/models/eq_finetune_062.h5
+input_model: eq_finetune_outputs/models/eq_finetune_019.h5
 output_name: finnish_finetuned_best_eval_outputs
 ================== Testing Parameters =======================
 mode: generator
-finished the test in:  0 hours and 2 minutes and 6.06 seconds 
+finished the test in:  0 hours and 2 minutes and 12.76 seconds 
 loss_types: ['binary_crossentropy', 'binary_crossentropy', 'binary_crossentropy']
 loss_weights: [0.05, 0.4, 0.55]
 batch_size: 10

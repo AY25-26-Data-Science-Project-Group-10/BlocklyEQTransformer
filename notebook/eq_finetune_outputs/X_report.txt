@@ -1,5 +1,5 @@
 ================== Overal Info ==============================
-date of report: 2026-04-27 14:01:32.759572
+date of report: 2026-05-03 17:45:49.159918
 input_hdf5: ../data/finnish_eq_finetune.hdf5
 input_csv: ../data/finnish_eq_finetune.csv
 output_name: eq_finetune_outputs
@@ -9,7 +9,7 @@ cnn_blocks: 2
 lstm_blocks: 1
 padding_type: same
 activation_type: relu
-drop_rate: 0.1
+drop_rate: 0.2
 total params: 378,311
 trainable params: 376,423
 non-trainable params: 1,888
@@ -18,26 +18,26 @@ mode of training: generator
 loss_types: ['binary_crossentropy', 'binary_crossentropy', 'binary_crossentropy']
 loss_weights: [0.05, 0.4, 0.55]
 batch_size: 32
-epochs: 200
+epochs: 149
 train_valid_test_split: [0.8, 0.1, 0.1]
 total number of training: 1217
 total number of validation: 152
 monitor: val_loss
-patience: 40
+patience: 25
 multi_gpu: False
 number_of_gpus: 4
 gpuid: None
 gpu_limit: None
 use_multiprocessing: True
 ================== Training Performance =====================
-finished the training in:  2 hours and 39 minutes and 26.69 seconds 
-stoped after epoche: 102
-last loss: 0.010766691234158842
-last detector_loss: 0.02044965
-last P_loss: 0.005340038
-last S_loss: 0.013390295
-last detector_f1: 0.29675502
-last P_f1: 0.63927984
+finished the training in:  0 hours and 50 minutes and 7.77 seconds 
+stoped after epoche: 44
+last loss: 0.010393056822450538
+last detector_loss: 0.019601598
+last P_loss: 0.0058954833
+last S_loss: 0.012440035
+last detector_f1: 0.0
+last P_f1: 0.0020636725
 last S_f1: 0.0
 ================== Other Parameters =========================
 label_type: gaussian

@@ -30,11 +30,11 @@ notebook/finnish_finetuned_best_eval_outputs/X_test_results.csv
 
 | Metric | Pretrained | Best checkpoint | Change |
 | --- | ---: | ---: | ---: |
-| Matched event recall | 25.49% | 96.08% | +70.59 percentage points |
-| P coverage | 25.49% | 92.81% | +67.32 percentage points |
-| P MAE | 0.1064 s | 0.0077 s | -0.0987 s |
-| S coverage | 22.88% | 2.61% | -20.26 percentage points |
-| S MAE | 0.3111 s | 0.1150 s | -0.1961 s |
+| Matched event recall | 20.92% | 96.08% | +75.16 percentage points |
+| P coverage | 20.26% | 92.81% | +72.55 percentage points |
+| P MAE | 0.1287 s | 0.0077 s | -0.1210 s |
+| S coverage | 18.95% | 2.61% | -16.34 percentage points |
+| S MAE | 0.4838 s | 0.1150 s | -0.3688 s |
 
 ## Interpretation
 

@@ -264,7 +264,7 @@ The held-out split contains 153 Finnish earthquake traces and no `_NO` noise tra
 
 | Model | Matched event recall | P coverage | P MAE | S coverage | S MAE |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Pretrained `../pretrained/EqT_model.h5` | 25.49% | 25.49% | 0.1064 s | 22.88% | 0.3111 s |
+| Pretrained `../pretrained/EqT_model.h5` | 20.92% | 20.26% | 0.1287 s | 18.95% | 0.4838 s |
 | Fine-tuned best checkpoint from this run | 96.08% | 92.81% | 0.0077 s | 2.61% | 0.1150 s |
 
 The best checkpoint substantially improves event matching and P picking on this Finnish split. S-pick coverage is low, so further work should focus on S-phase performance before operational use.
