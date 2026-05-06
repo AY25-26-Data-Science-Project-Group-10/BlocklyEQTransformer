@@ -42,6 +42,15 @@ Open:
 blocklyeqt.ipynb
 ```
 
+Alternatively, run the same notebook as a browser-based Voila interface:
+
+```bash
+cd notebook
+voila blocklyeqt.ipynb
+```
+
+Voila exposes the same fields as the notebook in a browser UI. Fill the fields described below, then click **Launch Model** to start fine-tuning or **Validate** to run evaluation. Paths are still relative to the `notebook/` directory.
+
 ## Fine-Tune With Finnish Data
 
 In the notebook, set **Manage Datasets**:
@@ -136,17 +145,19 @@ notebook/finnish_finetuned_best_eval_outputs/X_report.txt
 
 ## Important Validation Setting
 
-The notebook validation cell currently sets:
+The notebook validation callback should use:
+
+```python
+number_of_plots=10000
+```
+
+This value is intentionally larger than the Finnish test set size so every detected trace is written to `X_test_results.csv`. If an older copy of the notebook still has:
 
 ```python
 number_of_plots=10
 ```
 
-For metric calculation, use a value larger than the test set size so every detected trace is written to `X_test_results.csv`:
-
-```python
-number_of_plots=10000
-```
+change it to `10000` before using Voila for comparison metrics.
 
 Alternatively, run this cell directly from the notebook directory:
 
