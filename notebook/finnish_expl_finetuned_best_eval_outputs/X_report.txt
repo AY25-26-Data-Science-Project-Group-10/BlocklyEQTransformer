@@ -1,0 +1,23 @@
+================== Overal Info ==============================
+date of report: 2026-06-03 20:04:45.377018
+input_hdf5: ../data/finnish_explosion_finetune.hdf5
+input_testset: expl_finetune_outputs/test.npy
+input_model: expl_finetune_outputs/models/expl_finetune_047.h5
+output_name: finnish_expl_finetuned_best_eval_outputs
+================== Testing Parameters =======================
+mode: generator
+finished the test in:  0 hours and 5 minutes and 8.19 seconds 
+loss_types: ['binary_crossentropy', 'binary_crossentropy', 'binary_crossentropy']
+loss_weights: [0.05, 0.4, 0.55]
+batch_size: 10
+total number of tests 416
+gpuid: None
+gpu_limit: None
+================== Other Parameters =========================
+normalization_mode: std
+estimate uncertainty: False
+number of Monte Carlo sampling: 2
+detection_threshold: 0.2
+P_threshold: 0.1
+S_threshold: 0.1
+number_of_plots: 10000

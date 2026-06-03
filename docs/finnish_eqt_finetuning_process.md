@@ -1,6 +1,6 @@
 # Finnish EQTransformer Fine-Tuning Process
 
-This guide documents the exact workflow for improving the pretrained EQTransformer model with the Finnish earthquake fine-tuning dataset in this repository, then comparing the pretrained model against the fine-tuned validation-best checkpoint.
+This guide documents the exact workflow for improving the pretrained EQTransformer model with the Finnish earthquake and explosion fine-tuning datasets in this repository, then comparing the pretrained model against the fine-tuned validation-best checkpoint.
 
 Use the same held-out Finnish test split for both models. Do not compare results from different `test.npy` files.
 
@@ -11,6 +11,13 @@ Use the Finnish earthquake fine-tuning pair:
 ```text
 data/finnish_eq_finetune.hdf5
 data/finnish_eq_finetune.csv
+```
+
+Use the Finnish explosion fine-tuning pair:
+
+```text
+data/finnish_explosion_finetune.hdf5
+data/finnish_explosion_finetune.csv
 ```
 
 The CSV must contain `trace_name`, and each trace must exist in the HDF5 file at:
@@ -234,3 +241,100 @@ The held-out split contains 193 Finnish earthquake traces and no `_NO` noise tra
 | Fine-tuned best checkpoint `eq_finetune_056.h5` | 89.12% | 68.39% | 0.1564 s | 4.66% | 0.0689 s |
 
 The best checkpoint substantially improves event matching and P picking on this Finnish split. S-pick coverage is low, so further work should focus on S-phase performance before operational use.
+
+## Fine-Tune With Finnish Explosion Data
+
+Use the same notebook workflow and model settings as the earthquake run. Replace
+only the data paths and output names:
+
+```text
+Upload HDF: ../data/finnish_explosion_finetune.hdf5
+Upload CSV: ../data/finnish_explosion_finetune.csv
+Output Name: expl_finetune
+```
+
+Use the best validation checkpoint saved in:
+
+```text
+notebook/expl_finetune_outputs/models/<best_checkpoint>.h5
+```
+
+## Evaluate Explosion Best Checkpoint
+
+Use the same validation settings as the earthquake run, with explosion paths:
+
+```text
+Model: expl_finetune_outputs/models/<best_checkpoint>.h5
+HDF5: ../data/finnish_explosion_finetune.hdf5
+Testset: expl_finetune_outputs/test.npy
+Output: finnish_expl_finetuned_best_eval
+```
+
+This produces:
+
+```text
+notebook/finnish_expl_finetuned_best_eval_outputs/X_test_results.csv
+notebook/finnish_expl_finetuned_best_eval_outputs/X_report.txt
+```
+
+Optional pretrained explosion baseline:
+
+```text
+Model: ../pretrained/EqT_model.h5
+HDF5: ../data/finnish_explosion_finetune.hdf5
+Testset: expl_finetune_outputs/test.npy
+Output: finnish_expl_pretrained_eval
+```
+
+This produces:
+
+```text
+notebook/finnish_expl_pretrained_eval_outputs/X_test_results.csv
+notebook/finnish_expl_pretrained_eval_outputs/X_report.txt
+```
+
+## Aggregate Explosion Metrics
+
+After the explosion validation result exists, aggregate the fine-tuned metrics
+with:
+
+```bash
+python3 scripts/print_finnish_explosion_comparison.py
+```
+
+By default, the script reads:
+
+```text
+notebook/expl_finetune_outputs/test.npy
+notebook/finnish_expl_finetuned_best_eval_outputs/X_test_results.csv
+```
+
+If you also evaluated the pretrained explosion baseline, include it in the
+comparison table:
+
+```bash
+python3 scripts/print_finnish_explosion_comparison.py \
+  --pretrained notebook/finnish_expl_pretrained_eval_outputs/X_test_results.csv
+```
+
+## Existing Explosion Run Results
+
+These metrics were computed on:
+
+```text
+notebook/expl_finetune_outputs/test.npy
+```
+
+The held-out split contains 416 Finnish explosion traces and no `_NO` noise
+traces. Because there are no noise traces, this split supports event recall and
+pick-error metrics, but it does not support detection precision or
+false-positive-rate estimates.
+
+| Model | Matched event recall | P coverage | P MAE | S coverage | S MAE |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Pretrained `../pretrained/EqT_model.h5` | 5.05% | 5.05% | 0.1652 s | 4.09% | 0.8612 s |
+| Fine-tuned best checkpoint `expl_finetune_047.h5` | 82.45% | 70.91% | 0.1653 s | 0.48% | 0.0800 s |
+
+The explosion checkpoint substantially improves event matching and P coverage
+on this split. S-pick coverage is very low, so further work should focus on
+S-phase performance before operational use.
