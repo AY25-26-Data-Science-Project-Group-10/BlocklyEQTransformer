@@ -2,83 +2,69 @@
 """Print pretrained vs fine-tuned Finnish EQT comparison metrics."""
 
 import argparse
-import csv
-import math
+import subprocess
 import sys
 from pathlib import Path
 
 import numpy as np
 
+from finnish_metric_utils import (
+    CSV_METRICS,
+    RAW_S_METRICS,
+    csv_metrics,
+    fmt,
+    merge_metrics,
+    raw_s_metrics,
+    read_rows,
+)
 
-def report_path(results_path):
-    return results_path.with_name("X_report.txt")
 
-
-def report_summary(results_path):
-    path = report_path(results_path)
+def report_value(results_path, key):
+    path = results_path.with_name("X_report.txt")
     if not path.exists():
-        return []
-
-    interesting = (
-        "input_model:",
-        "input_testset:",
-        "detection_threshold:",
-        "P_threshold:",
-        "S_threshold:",
-        "number_of_plots:",
-    )
-    lines = []
+        return None
     for line in path.read_text().splitlines():
-        if line.startswith(interesting):
-            lines.append(line)
-    return lines
+        prefix = f"{key}: "
+        if line.startswith(prefix):
+            return line[len(prefix) :].strip()
+    return None
 
 
-def read_rows(path):
-    if not path.exists():
-        raise FileNotFoundError(f"Missing results file: {path}")
-
-    with path.open(newline="") as handle:
-        reader = csv.reader(handle)
-        next(reader)
-        return list(reader)
-
-
-def phase_errors(rows, column):
-    errors = []
-    for row in rows:
-        if len(row) > column and row[column] not in ("", "None"):
-            errors.append(float(row[column]))
-    return np.array(errors, dtype=float)
+def resolve_report_path(value, notebook_relative=True):
+    if value is None:
+        return None
+    path = Path(value)
+    if notebook_relative and not path.is_absolute():
+        path = Path("notebook") / path
+    return path
 
 
-def metrics(rows, total):
-    detected = {
-        row[4]
-        for row in rows
-        if len(row) > 14 and row[14] not in ("", "0", "None")
-    }
-    result = {
-        "Matched event recall": 100 * len(detected) / total,
-    }
-
-    # Column indices match this repository's tester output CSV layout.
-    for phase, column in [("P", 20), ("S", 24)]:
-        errors = phase_errors(rows, column)
-        result[f"{phase} coverage"] = 100 * len(errors) / total
-        result[f"{phase} MAE"] = (
-            float(np.mean(np.abs(errors)) / 100) if len(errors) else math.nan
-        )
-
-    return result
-
-
-def fmt(value, unit):
-    if math.isnan(value):
-        return "n/a"
-    if unit == "s":
-        return f"{value:.4f} s"
-    return f"{value:.2f}%"
+def ensure_raw_s(args, label, model, output_csv):
+    if not args.compute_raw_s:
+        return
+    if model is None:
+        raise ValueError(f"Cannot compute {label} raw-S metrics without a model path")
+    if output_csv.exists() and not args.overwrite_raw_s:
+        return
+    command = [
+        sys.executable,
+        "scripts/diagnose_raw_s_picks.py",
+        "--model",
+        str(model),
+        "--hdf5",
+        str(args.hdf5),
+        "--testset",
+        str(args.testset),
+        "--output-csv",
+        str(output_csv),
+        "--s-threshold",
+        str(args.s_threshold),
+        "--p-threshold",
+        str(args.p_threshold),
+        "--detection-threshold",
+        str(args.detection_threshold),
+    ]
+    subprocess.run(command, check=True)
 
 
 def main():
@@ -100,6 +86,38 @@ def main():
         default="notebook/finnish_finetuned_best_eval_outputs/X_test_results.csv",
         type=Path,
     )
+    parser.add_argument(
+        "--hdf5",
+        default="data/finnish_eq_finetune.hdf5",
+        type=Path,
+    )
+    parser.add_argument(
+        "--pretrained-model",
+        default=None,
+        type=Path,
+        help="Model path for --compute-raw-s. Defaults to value in pretrained X_report.txt.",
+    )
+    parser.add_argument(
+        "--finetuned-model",
+        default=None,
+        type=Path,
+        help="Model path for --compute-raw-s. Defaults to value in fine-tuned X_report.txt.",
+    )
+    parser.add_argument(
+        "--pretrained-raw-s",
+        default="notebook/eq_pretrained_raw_s_diagnostic.csv",
+        type=Path,
+    )
+    parser.add_argument(
+        "--finetuned-raw-s",
+        default="notebook/eq_raw_s_diagnostic.csv",
+        type=Path,
+    )
+    parser.add_argument("--compute-raw-s", action="store_true")
+    parser.add_argument("--overwrite-raw-s", action="store_true")
+    parser.add_argument("--detection-threshold", default=0.2, type=float)
+    parser.add_argument("--p-threshold", default=0.1, type=float)
+    parser.add_argument("--s-threshold", default=0.1, type=float)
     args = parser.parse_args()
 
     total = len(np.load(args.testset, allow_pickle=True))
@@ -109,39 +127,32 @@ def main():
     except FileNotFoundError as exc:
         sys.exit(str(exc))
 
-    missing = []
-    if not pretrained_rows:
-        missing.append(("pretrained", args.pretrained))
-    if not finetuned_rows:
-        missing.append(("fine-tuned", args.finetuned))
+    if not pretrained_rows or not finetuned_rows:
+        sys.exit("Both pretrained and fine-tuned results must contain rows.")
 
-    if missing:
-        print(f"Test traces: {total}")
-        print()
-        for label, path in missing:
-            print(f"Cannot compute {label} metrics: no result rows in {path}")
-            details = report_summary(path)
-            if details:
-                print("Validation report:")
-                for line in details:
-                    print(f"  {line}")
-            print()
-        print(
-            "Rerun validation for the intended checkpoint, or lower thresholds, "
-            "until X_test_results.csv contains detected/picked rows."
-        )
-        sys.exit(1)
+    pretrained_model = args.pretrained_model or resolve_report_path(
+        report_value(args.pretrained, "input_model"), notebook_relative=True
+    )
+    finetuned_model = args.finetuned_model or resolve_report_path(
+        report_value(args.finetuned, "input_model"), notebook_relative=True
+    )
 
-    pretrained = metrics(pretrained_rows, total)
-    finetuned = metrics(finetuned_rows, total)
+    try:
+        ensure_raw_s(args, "pretrained", pretrained_model, args.pretrained_raw_s)
+        ensure_raw_s(args, "fine-tuned", finetuned_model, args.finetuned_raw_s)
+    except (subprocess.CalledProcessError, ValueError) as exc:
+        sys.exit(str(exc))
 
-    rows = [
-        ("Matched event recall", "%"),
-        ("P coverage", "%"),
-        ("P MAE", "s"),
-        ("S coverage", "%"),
-        ("S MAE", "s"),
-    ]
+    pretrained = merge_metrics(
+        csv_metrics(pretrained_rows, total),
+        raw_s_metrics(args.pretrained_raw_s, total),
+    )
+    finetuned = merge_metrics(
+        csv_metrics(finetuned_rows, total),
+        raw_s_metrics(args.finetuned_raw_s, total),
+    )
+
+    rows = CSV_METRICS + RAW_S_METRICS
 
     print(f"Test traces: {total}")
     print()

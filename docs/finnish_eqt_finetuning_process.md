@@ -217,12 +217,21 @@ and fine-tuned comparison metrics with:
 python3 scripts/print_finnish_comparison.py
 ```
 
+If the raw-S diagnostic CSVs need to be generated or refreshed, run the same
+script from the Keras/TensorFlow environment with:
+
+```bash
+python3 scripts/print_finnish_comparison.py --compute-raw-s
+```
+
 By default, the script reads:
 
 ```text
 notebook/eq_finetune_outputs/test.npy
 notebook/finnish_pretrained_eval_outputs/X_test_results.csv
 notebook/finnish_finetuned_best_eval_outputs/X_test_results.csv
+notebook/eq_pretrained_raw_s_diagnostic.csv
+notebook/eq_raw_s_diagnostic.csv
 ```
 
 ## Existing Run Results
@@ -235,12 +244,25 @@ notebook/eq_finetune_outputs/test.npy
 
 The held-out split contains 193 Finnish earthquake traces and no `_NO` noise traces. Because there are no noise traces, this split supports event recall and pick-error metrics, but it does not support detection precision or false-positive-rate estimates.
 
-| Model | Matched event recall | P coverage | P MAE | S coverage | S MAE |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Pretrained `../pretrained/EqT_model.h5` | 15.03% | 14.51% | 0.1746 s | 12.95% | 0.4444 s |
-| Fine-tuned best checkpoint `eq_finetune_056.h5` | 89.12% | 68.39% | 0.1564 s | 4.66% | 0.0689 s |
+| Metric | Pretrained | Fine-tuned best |
+| --- | ---: | ---: |
+| Matched event recall | 15.03% | 89.12% |
+| P coverage | 14.51% | 68.39% |
+| P MAE | 0.1746 s | 0.1564 s |
+| S coverage (CSV first match) | 12.95% | 4.66% |
+| S MAE (CSV first match) | 0.4444 s | 0.0689 s |
+| S coverage (all picker matches) | 13.47% | 49.22% |
+| S MAE (all picker matches) | 0.4358 s | 0.0902 s |
+| Raw S peak within 0.2 s | 5.18% | 53.89% |
+| Raw S peak within 0.5 s | 9.33% | 71.50% |
+| Raw S peak within 1.0 s | 11.92% | 84.46% |
+| Raw S nearest-peak MAE | 0.4358 s | 1.3974 s |
 
-The best checkpoint substantially improves event matching and P picking on this Finnish split. S-pick coverage is low, so further work should focus on S-phase performance before operational use.
+The best checkpoint substantially improves event matching and P picking on this
+Finnish split. The raw S head is also much better after fine-tuning. The
+original `X_test_results.csv` first-match S columns undercount useful S picks
+because a later detection match can contain S even when the first written match
+does not.
 
 ## Fine-Tune With Finnish Explosion Data
 
@@ -302,11 +324,20 @@ with:
 python3 scripts/print_finnish_explosion_comparison.py
 ```
 
+If the raw-S diagnostic CSVs need to be generated or refreshed, run:
+
+```bash
+python3 scripts/print_finnish_explosion_comparison.py --compute-raw-s
+```
+
 By default, the script reads:
 
 ```text
 notebook/expl_finetune_outputs/test.npy
 notebook/finnish_expl_finetuned_best_eval_outputs/X_test_results.csv
+notebook/finnish_expl_pretrained_eval_outputs/X_test_results.csv
+notebook/expl_pretrained_raw_s_diagnostic.csv
+notebook/expl_raw_s_diagnostic.csv
 ```
 
 If you also evaluated the pretrained explosion baseline, include it in the
@@ -330,11 +361,21 @@ traces. Because there are no noise traces, this split supports event recall and
 pick-error metrics, but it does not support detection precision or
 false-positive-rate estimates.
 
-| Model | Matched event recall | P coverage | P MAE | S coverage | S MAE |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Pretrained `../pretrained/EqT_model.h5` | 5.05% | 5.05% | 0.1652 s | 4.09% | 0.8612 s |
-| Fine-tuned best checkpoint `expl_finetune_047.h5` | 82.45% | 70.91% | 0.1653 s | 0.48% | 0.0800 s |
+| Metric | Pretrained | Fine-tuned best |
+| --- | ---: | ---: |
+| Matched event recall | 5.05% | 82.45% |
+| P coverage | 5.05% | 70.91% |
+| P MAE | 0.1652 s | 0.1653 s |
+| S coverage (CSV first match) | 4.09% | 0.48% |
+| S MAE (CSV first match) | 0.8612 s | 0.0800 s |
+| S coverage (all picker matches) | 3.85% | 20.91% |
+| S MAE (all picker matches) | 0.8538 s | 0.1031 s |
+| Raw S peak within 0.2 s | 2.40% | 34.13% |
+| Raw S peak within 0.5 s | 2.88% | 60.10% |
+| Raw S peak within 1.0 s | 3.37% | 75.00% |
+| Raw S nearest-peak MAE | 0.7994 s | 0.6343 s |
 
 The explosion checkpoint substantially improves event matching and P coverage
-on this split. S-pick coverage is very low, so further work should focus on
-S-phase performance before operational use.
+on this split. The raw S head improves substantially, but all-match S coverage
+still remains much lower than raw S near-peak coverage, so detector-window
+association remains a limiting factor.
