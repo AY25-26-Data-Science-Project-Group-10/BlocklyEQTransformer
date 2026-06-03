@@ -203,64 +203,19 @@ tester(
 
 ## Aggregate Comparison Metrics
 
-The repository tester writes per-trace picks and errors, but it does not aggregate metrics. Use this after both evaluations finish:
+The repository tester writes per-trace picks and errors. Aggregate the pretrained
+and fine-tuned comparison metrics with:
 
-```python
-import csv
-import math
-import os
-import numpy as np
+```bash
+python3 scripts/print_finnish_comparison.py
+```
 
-base = "."
-test = np.load(os.path.join(base, "eq_finetune_outputs", "test.npy"), allow_pickle=True)
-total = len(test)
+By default, the script reads:
 
-paths = {
-    "pretrained": os.path.join(
-        base,
-        "finnish_pretrained_eval_outputs",
-        "X_test_results.csv",
-    ),
-    "finetuned_best_checkpoint": os.path.join(
-        base,
-        "finnish_finetuned_best_eval_outputs",
-        "X_test_results.csv",
-    ),
-}
-
-for name, path in paths.items():
-    with open(path) as handle:
-        reader = csv.reader(handle)
-        next(reader)
-        rows = list(reader)
-
-    detected = {
-        row[4]
-        for row in rows
-        if len(row) > 14 and row[14] not in ("", "0", "None")
-    }
-
-    print(f"\n{name}")
-    print(f"test_total: {total}")
-    print(f"matched_event_recall_pct: {100 * len(detected) / total:.2f}")
-
-    for phase, error_column in [("P", 20), ("S", 24)]:
-        errors = []
-        for row in rows:
-            if len(row) > error_column and row[error_column] not in ("", "None"):
-                errors.append(float(row[error_column]))
-
-        errors = np.array(errors, dtype=float)
-        print(f"{phase}_coverage_pct: {100 * len(errors) / total:.2f}")
-
-        if len(errors):
-            abs_errors = np.abs(errors)
-            print(f"{phase}_mae_s: {abs_errors.mean() / 100:.4f}")
-            print(f"{phase}_median_abs_s: {np.median(abs_errors) / 100:.4f}")
-            print(f"{phase}_rmse_s: {math.sqrt(np.mean(errors ** 2)) / 100:.4f}")
-            print(f"{phase}_within_0.1s_pct: {100 * np.mean(abs_errors <= 10):.2f}")
-            print(f"{phase}_within_0.2s_pct: {100 * np.mean(abs_errors <= 20):.2f}")
-            print(f"{phase}_within_0.5s_pct: {100 * np.mean(abs_errors <= 50):.2f}")
+```text
+notebook/eq_finetune_outputs/test.npy
+notebook/finnish_pretrained_eval_outputs/X_test_results.csv
+notebook/finnish_finetuned_best_eval_outputs/X_test_results.csv
 ```
 
 ## Existing Run Results
@@ -271,11 +226,11 @@ These metrics were computed on:
 notebook/eq_finetune_outputs/test.npy
 ```
 
-The held-out split contains 153 Finnish earthquake traces and no `_NO` noise traces. Because there are no noise traces, this split supports event recall and pick-error metrics, but it does not support detection precision or false-positive-rate estimates.
+The held-out split contains 193 Finnish earthquake traces and no `_NO` noise traces. Because there are no noise traces, this split supports event recall and pick-error metrics, but it does not support detection precision or false-positive-rate estimates.
 
 | Model | Matched event recall | P coverage | P MAE | S coverage | S MAE |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Pretrained `../pretrained/EqT_model.h5` | 20.92% | 20.26% | 0.1287 s | 18.95% | 0.4838 s |
-| Fine-tuned best checkpoint from this run | 96.08% | 92.81% | 0.0077 s | 2.61% | 0.1150 s |
+| Pretrained `../pretrained/EqT_model.h5` | 15.03% | 14.51% | 0.1746 s | 12.95% | 0.4444 s |
+| Fine-tuned best checkpoint `eq_finetune_056.h5` | 89.12% | 68.39% | 0.1564 s | 4.66% | 0.0689 s |
 
 The best checkpoint substantially improves event matching and P picking on this Finnish split. S-pick coverage is low, so further work should focus on S-phase performance before operational use.

@@ -1,0 +1,23 @@
+================== Overal Info ==============================
+date of report: 2026-06-03 15:03:16.922247
+input_hdf5: ../data/finnish_eq_finetune.hdf5
+input_testset: eq_finetune_outputs/test.npy
+input_model: eq_finetune_outputs/models/eq_finetune_056.h5
+output_name: finnish_finetuned_best_eval_outputs
+================== Testing Parameters =======================
+mode: generator
+finished the test in:  0 hours and 2 minutes and 13.42 seconds 
+loss_types: ['binary_crossentropy', 'binary_crossentropy', 'binary_crossentropy']
+loss_weights: [0.05, 0.4, 0.55]
+batch_size: 10
+total number of tests 193
+gpuid: None
+gpu_limit: None
+================== Other Parameters =========================
+normalization_mode: std
+estimate uncertainty: False
+number of Monte Carlo sampling: 2
+detection_threshold: 0.2
+P_threshold: 0.1
+S_threshold: 0.1
+number_of_plots: 10000
